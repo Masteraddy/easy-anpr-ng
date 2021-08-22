@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>Upload two images</h1>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+  <form method=post enctype=multipart/form-data>
+    <label for="file1">Plate Number</label>
+    <input type=file name=file1>
+    <label for="file2">Owner Face</label>
+    <input type=file name=file2>
+    <input type=submit value=Upload>
+  </form>
+{% endblock %}
