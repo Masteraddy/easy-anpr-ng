@@ -1,7 +1,43 @@
 <!-- @format -->
 {% extends 'layout.html' %} {% block body %}
-<h2>Owner Face:</h2>
-<img src="{{result.owner_face}}" alt="" />
-<h2>Plate Number:</h2>
-<img src="{{result.plate_number}}" alt="" />
+<h1>Plate Number: {{result.platenumber}}</h1>
+<div class="wrapper-top">
+  <div>
+    <h2>Owner Face:</h2>
+    <img src="/{{result.face}}" alt="" />
+  </div>
+  <div>
+    <h2>Plate Image:</h2>
+    <img src="/{{result.plate}}" alt="" />
+  </div>
+</div>
+<div class="wrapper-bottom">
+  <table>
+    <tr>
+      <th>Platenumber</th>
+      <th>Check In Time</th>
+      <th>Check Out Time</th>
+      <th>Checked Out</th>
+      <th>Action</th>
+    </tr>
+
+    {% for field in allchecks %}
+    <tr>
+      <td>{{field.platenumber}}</td>
+      <td>{{field.checkintime}}</td>
+      <td>{{field.checkouttime}}</td>
+      <td>{{field.ischeck}}</td>
+      <td>
+        {% if not field.ischeck %}
+        <form action="/checkout/{{field.id}}" method="post">
+          <input type="submit" value="Check Out Now" />
+        </form>
+        {% else %}
+        <button disabled id="checked">Already Checked Out</button>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
 {% endblock %}

@@ -1,12 +1,15 @@
 from flask import Flask, request, redirect, render_template, flash, url_for
+from flask_mongoengine import MongoEngine
 
 import os
 import json
 import string
+from datetime import date
 from werkzeug.utils import secure_filename
 
 import face_utils as fr
 import plate_utils as pl
+import dbconfig as db
 
 
 PLATE_FOLDER = 'static/plates'
@@ -42,7 +45,6 @@ def save_face_and_platenumber():
         if allowed_file(file1.filename) and allowed_file(file2.filename):
             plate_path = os.path.join(PROCESSING_FOLDER, secure_filename(file1.filename))
             face_path = os.path.join(PROCESSING_FOLDER, secure_filename(file2.filename))
-            
             file1.save(plate_path)
             file2.save(face_path)
             ext1 = file1.filename.split('.')[1]
@@ -66,13 +68,17 @@ def save_face_and_platenumber():
             # newresult = (ret[0], ret[2])
             newPltname = secure_filename(platenumber+'.'+ext1)
 
+            usernotcheck = db.UserData.objects(platenumber=platenumber, ischeck=False).first();
+            # print(usernotcheck)
+            if(usernotcheck):
+                return redirect("/result/"+usernotcheck.id)
+
             #Detect the face on the picture
             face = fr.find_face_locations(face_path)
             if len(face) == 0:
                 print(face)
                 flash('No face or more than one face is found')
                 return redirect(request.url)
-            # print(newresult)
 
             #Rename the files into the platenumber
             saved_plate = os.path.join(PLATE_FOLDER, newPltname)
@@ -88,14 +94,56 @@ def save_face_and_platenumber():
             os.remove(face_path)
 
             resp_data = {"plate_number": saved_plate, "owner_face": saved_face } # convert ret (numpy._bool) to bool for json.dumps
+            newdata = db.UserData(face=saved_face, plate=saved_plate, platenumber=platenumber, ischeck=False, checkintime=date.today())
+            newdata.save()
 
-            return render_template('result.html', result=resp_data)
+            return render_template('regresult.html', result=resp_data)
 
     # Return a demo page for GET request
     return render_template('home.html')
 
+#Just for testing
+@app.route('/check', methods=['GET'])
+def check_e():
+    usernotcheck = db.UserData.objects(platenumber="RBC587MK", ischeck=False).first();
+    print(usernotcheck.platenumber, usernotcheck.ischeck, usernotcheck.id)
 
-@app.route('/check-plate', methods=['POST', 'GET'])
+    if(usernotcheck):
+        usercheck = db.UserData.objects(platenumber="RBC587MK").all();
+        allchecks = usercheck.to_json()
+        
+        print(usernotcheck.to_json())
+        usernot = {"plate_number": usernotcheck.plate, "owner_face": usernotcheck.face }
+        return render_template('result.html', result=usernot, allchecks=allchecks)
+
+    flash('Platenumber is not found in the database')
+    return redirect('/')
+
+
+#Update The isCheck and checkout time
+@app.route('/checkout/<id>', methods=['POST'])
+def check_out(id: str):
+    # body = request.get_json();
+    ud = db.UserData.objects.get_or_404(id=id);
+    ud.update(checkouttime=date.today(), ischeck=True)
+    print(ud.to_json());
+    return redirect("/plate/"+ud.platenumber)
+
+
+@app.route('/plate/<plate>', methods=['POST', 'GET'])
+def check_plate(plate: str):
+    usernotcheck = db.UserData.objects(platenumber=plate).first();
+
+    if(usernotcheck):
+        usercheck = db.UserData.objects(platenumber=plate).all();
+        allchecks = usercheck.to_json()
+        print(allchecks)
+        return render_template('result.html', result=usernotcheck, allchecks=usercheck)
+
+    flash('Platenumber is not found in the database')
+    return redirect('/')
+
+@app.route('/check-with-face', methods=['POST', 'GET'])
 def check_with_face():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -116,21 +164,17 @@ def check_with_face():
                 flash('No face is found')
                 return redirect(request.url)
 
-            plate = pl.find_plate(result)
-            face = fr.find_face(result)
-            
-            if plate=='Unknown' or face=='Unknown':
+            if result == "Unknown":
                 flash('This face is not found in our database')
                 return redirect(request.url)
 
-            resp_data = {"plate_number": plate, "owner_face": face } 
-
-            return render_template('result.html', result=resp_data)
-
+            # Find the platenumber from the database
+            return redirect("/plate/"+result)
+            
     # Return a demo page for GET request
-    return render_template('check.html', page='Face', check="Plate Number")
+    return render_template('check.html', page='Face', check="With Face")
 
-@app.route('/check-face', methods=['POST', 'GET'])
+@app.route('/check-with-plate', methods=['POST', 'GET'])
 def check_with_plate():
     if request.method == 'POST':
         # check if the post request has the file part
@@ -161,19 +205,17 @@ def check_with_plate():
 
             print(platenumber)
 
-            plate = pl.find_plate(platenumber)
-            face = fr.find_face(platenumber)
+            reslt = db.UserData.objects(platenumber=platenumber).first();
 
-            if plate=='Unknown' or face=='Unknown':
-                flash('This platenumber is not in our database')
-                return redirect(request.url)
+            if reslt:
+                # Find the platenumber from the database
+                return redirect("/plate/"+reslt.platenumber)
 
-            resp_data = {"plate_number": plate, "owner_face": face } 
-
-            return render_template('result.html', result=resp_data)
+            flash('This platenumber is not in our database')
+            return redirect(request.url)
 
     # Return a demo page for GET request
-    return render_template('check.html', page='Plate Number', check="Face")
+    return render_template('check.html', page='Plate Number', check="With Plate Number")
 
 # Run in HTTP
 # When debug = True, code is reloaded on the fly while saved

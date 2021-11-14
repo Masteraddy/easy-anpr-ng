@@ -8,6 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ANPR with Face Recognition</title>
     <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
       input[type="file"] {
         width: 100%;
         padding: 12px 20px;
@@ -18,7 +24,8 @@
         box-sizing: border-box;
       }
 
-      input[type="submit"] {
+      input[type="submit"],
+      button {
         width: 100%;
         background-color: #4caf50;
         color: white;
@@ -29,7 +36,13 @@
         cursor: pointer;
       }
 
-      input[type="submit"]:hover {
+      #checked {
+        background-color: #999;
+        color: white;
+      }
+
+      input[type="submit"]:hover,
+      button:hover {
         background-color: #45a049;
       }
 
@@ -42,6 +55,8 @@
       }
       body {
         display: flex;
+        width: 100%;
+        padding: 1rem;
         flex-direction: column;
         align-items: center;
         justify-self: center;
@@ -64,14 +79,148 @@
         width: 100%;
         height: auto;
       }
+      .wrapper-top {
+        display: grid;
+        width: 100%;
+        grid-template-columns: auto auto;
+        max-width: 45rem;
+        grid-gap: 0.5rem;
+        margin: auto;
+      }
+
+      .wrapper-bottom {
+        overflow-x: scroll;
+      }
+
+      @media only screen and (max-width: 600px) {
+        .wrapper-top {
+          grid-template-columns: auto;
+        }
+      }
+
+      div {
+        width: 100%;
+      }
+
+      table {
+        font-family: Arial, Helvetica, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+
+      table td,
+      table th {
+        border: 1px solid #ddd;
+        padding: 8px;
+      }
+
+      table tr:nth-child(even) {
+        background-color: #f2f2f2;
+      }
+
+      table tr:hover {
+        background-color: #ddd;
+      }
+
+      table th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #04aa6d;
+        color: white;
+      }
+
+      /* Center the loader */
+      #wraploader {
+        background: #f2f2f2;
+        z-index: 100;
+      }
+      #loader {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        z-index: 1;
+        width: 80px;
+        height: 80px;
+        margin: -40px 0 0 -40px;
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #04aa6d;
+        -webkit-animation: spin 2s linear infinite;
+        animation: spin 2s linear infinite;
+      }
+
+      @-webkit-keyframes spin {
+        0% {
+          -webkit-transform: rotate(0deg);
+        }
+        100% {
+          -webkit-transform: rotate(360deg);
+        }
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Add animation to "page content" */
+      .animate-bottom {
+        position: relative;
+        -webkit-animation-name: animatebottom;
+        -webkit-animation-duration: 1s;
+        animation-name: animatebottom;
+        animation-duration: 1s;
+      }
+
+      @-webkit-keyframes animatebottom {
+        from {
+          bottom: -100px;
+          opacity: 0;
+        }
+        to {
+          bottom: 0px;
+          opacity: 1;
+        }
+      }
+
+      @keyframes animatebottom {
+        from {
+          bottom: -100px;
+          opacity: 0;
+        }
+        to {
+          bottom: 0;
+          opacity: 1;
+        }
+      }
     </style>
   </head>
   <body>
+    <div id="wraploader">
+      <div id="loader"></div>
+    </div>
     <div class="container nav">
       <a href="/">Upload Image</a>
-      <a href="/check-plate">Check Plate</a>
-      <a href="/check-face">Check Face</a>
+      <a href="/check-with-plate">Check With Plate</a>
+      <a href="/check-with-face">Check With Face</a>
     </div>
     <div class="container">{% block body %}{% endblock %}</div>
+    <script>
+      var myVar;
+
+      function myFunction() {
+        myVar = setTimeout(showPage, 3000);
+      }
+
+      function showPage() {
+        document.getElementById("loader").style.display = "none";
+        // document.getElementById("myDiv").style.display = "block";
+      }
+    </script>
   </body>
 </html>

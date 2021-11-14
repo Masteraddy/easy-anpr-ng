@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw
 from werkzeug.utils import secure_filename
 import face_recognition as fr
 
+import dbconfig as db
 
 FACE_FOLDER = 'static/faces'
 PROCESSING_FOLDER = 'static/processing'
@@ -54,14 +55,12 @@ def face_rec(file):
         print(faces)
         return 'No face is found'
 
-    for f in os.listdir(FACE_FOLDER):
-        nm = os.path.splitext(f)[0]
-        # ext = os.path.splitext(f)[1]
-        known_faces.append((nm, os.path.join(FACE_FOLDER, secure_filename(f))))
-        
-    for name, known_file in known_faces:
-        if compare_faces(known_file,file):
-            return name
+    check = db.UserData.objects().all();
+
+    for fc in check:
+        if compare_faces(fc.face,file):
+            return fc.platenumber
+            
     return 'Unknown' 
 
 def find_face_locations(file):

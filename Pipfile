@@ -9,6 +9,8 @@ face-recognition = "*"
 flask = "*"
 numpy = "*"
 easyocr = "*"
+cloudinary = "*"
+flask-mongoengine = "*"
 
 [dev-packages]
 
