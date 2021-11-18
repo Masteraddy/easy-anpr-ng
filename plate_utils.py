@@ -49,6 +49,7 @@ def overlay_ocr_text(img_path, result, newname):
     # show and save image        
     saved_plate = os.path.join(PLATE_FOLDER, newname)
     cv2.imwrite(saved_plate, img)
+    return saved_plate
 
 def recognize_text(img_path):
     '''loads an image and recognizes text.'''

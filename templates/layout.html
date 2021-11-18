@@ -46,6 +46,11 @@
         background-color: #45a049;
       }
 
+      .flashes {
+        color: red;
+        background: yellow;
+      }
+
       .container {
         max-width: 45rem;
         display: flex;
@@ -132,8 +137,14 @@
 
       /* Center the loader */
       #wraploader {
+        display: none;
+        position: absolute;
         background: #f2f2f2;
         z-index: 100;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
       }
       #loader {
         position: absolute;
@@ -143,7 +154,7 @@
         width: 80px;
         height: 80px;
         margin: -40px 0 0 -40px;
-        border: 16px solid #f3f3f3;
+        border: 16px solid #555;
         border-radius: 50%;
         border-top: 16px solid #04aa6d;
         -webkit-animation: spin 2s linear infinite;
@@ -211,15 +222,14 @@
     </div>
     <div class="container">{% block body %}{% endblock %}</div>
     <script>
-      var myVar;
-
-      function myFunction() {
-        myVar = setTimeout(showPage, 3000);
+      function stopLoader() {
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("wraploader").style.display = "block";
       }
 
-      function showPage() {
-        document.getElementById("loader").style.display = "none";
-        // document.getElementById("myDiv").style.display = "block";
+      function startLoader() {
+        document.getElementById("loader").style.display = "block";
+        document.getElementById("wraploader").style.display = "block";
       }
     </script>
   </body>

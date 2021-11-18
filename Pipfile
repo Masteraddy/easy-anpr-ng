@@ -11,6 +11,8 @@ numpy = "*"
 easyocr = "*"
 cloudinary = "*"
 flask-mongoengine = "*"
+python-dotenv = "*"
+gunicorn = "*"
 
 [dev-packages]
 

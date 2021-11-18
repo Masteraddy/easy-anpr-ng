@@ -1,5 +1,12 @@
 from flask import Flask, request, redirect, render_template, flash, url_for
 from flask_mongoengine import MongoEngine
+from dotenv import load_dotenv
+
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+from cloudinary.utils import cloudinary_url
 
 import os
 import json
@@ -11,6 +18,7 @@ import face_utils as fr
 import plate_utils as pl
 import dbconfig as db
 
+load_dotenv()
 
 PLATE_FOLDER = 'static/plates'
 FACE_FOLDER = 'static/faces'
@@ -29,6 +37,9 @@ app.secret_key='secret123'
 
 @app.route('/', methods=['POST', 'GET'])
 def save_face_and_platenumber():
+    cloudinary.config(cloud_name = os.getenv('CLOUD_NAME'), api_key=os.getenv('API_KEY'), 
+    api_secret=os.getenv('API_SECRET'))
+
     if request.method == 'POST':
         # check if the post request has the file part
         if ('file1' not in request.files) or ('file2' not in request.files):
@@ -37,6 +48,7 @@ def save_face_and_platenumber():
 
         file1 = request.files.get('file1')
         file2 = request.files.get('file2')
+
         # if user does not select file, browser also submit an empty part without filename
         if file1.filename == '' or file2.filename == '':
             flash('No selected file')
@@ -54,6 +66,7 @@ def save_face_and_platenumber():
 
             #Recognizing the text
             ret = pl.recognize_text(plate_path)
+
             #filter the plate number
             if len(ret) < 2:
                 flash('Only picture with platenumber is allowed')
@@ -85,16 +98,25 @@ def save_face_and_platenumber():
             saved_face = os.path.join(FACE_FOLDER, secure_filename(platenumber+'.'+ext2))
 
             #Draw a triangle around the plate and face
-            pl.overlay_ocr_text(plate_path, plateresult, newPltname)
-            fr.overlay_face(face_path, face, saved_face)
+            pl_img = pl.overlay_ocr_text(plate_path, plateresult, newPltname)
+            fr_img = fr.overlay_face(face_path, face, saved_face)
+
+            print(pl_img)
+            print(fr_img)
+
+            pl_result = cloudinary.uploader.upload(pl_img)
+            fr_result = cloudinary.uploader.upload(fr_img)
+
+            print(pl_result)
+            print(fr_result)
 
             # os.rename(plate_path, saved_plate)
             # os.rename(face_path, saved_face)
             os.remove(plate_path)
             os.remove(face_path)
 
-            resp_data = {"plate_number": saved_plate, "owner_face": saved_face } # convert ret (numpy._bool) to bool for json.dumps
-            newdata = db.UserData(face=saved_face, plate=saved_plate, platenumber=platenumber, ischeck=False, checkintime=date.today())
+            resp_data = {"plate_number": pl_result.get('secure_url'), "owner_face": fr_result.get('secure_url') } # convert ret (numpy._bool) to bool for json.dumps
+            newdata = db.UserData(face=fr_result.get('secure_url'), plate=pl_result.get('secure_url'), platenumber=platenumber, ischeck=False, checkintime=date.today())
             newdata.save()
 
             return render_template('regresult.html', result=resp_data)

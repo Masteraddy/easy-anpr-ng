@@ -1,10 +1,16 @@
+import os
+
 from flask import Flask
 from flask_mongoengine import MongoEngine
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 
+dbhost = os.getenv('MONGO_URI')
+
 app.config['MONGODB_SETTINGS'] = {
-    'host':'mongodb+srv://eliteaddy:adeshile@cluster0-ufp8b.mongodb.net/recognizer?retryWrites=true'
+    'host': dbhost
 }
 
 db = MongoEngine(app)

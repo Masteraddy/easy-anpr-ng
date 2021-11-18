@@ -3,6 +3,7 @@ import os
 from PIL import Image, ImageDraw
 from werkzeug.utils import secure_filename
 import face_recognition as fr
+import urllib
 
 import dbconfig as db
 
@@ -29,6 +30,11 @@ def compare_faces(file1, file2):
     """
     Compare two images and return True / False for matching.
     """
+
+    if 'http' in file2:
+        urllib.request.urlretrieve(file2, os.path.join(PROCESSING_FOLDER, 'inprocess.jpg'))
+        file2 = os.path.join(PROCESSING_FOLDER , 'inprocess.jpg')
+
     # Load the jpg files into numpy arrays
     image1 = fr.load_image_file(file1)
     image2 = fr.load_image_file(file2)
@@ -58,7 +64,7 @@ def face_rec(file):
     check = db.UserData.objects().all();
 
     for fc in check:
-        if compare_faces(fc.face,file):
+        if compare_faces(file, fc.face):
             return fc.platenumber
             
     return 'Unknown' 
@@ -89,3 +95,5 @@ def overlay_face(file, face, name):
     pil_image.save(name)
 
     del draw
+
+    return name
