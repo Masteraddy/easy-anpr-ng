@@ -1,5 +1,5 @@
 cloudinary
-easyocr=1.4
+easyocr==1.4
 face-recognition
 face-recognition-models
 Flask
