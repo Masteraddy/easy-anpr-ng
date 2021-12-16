@@ -12,5 +12,3 @@ opencv-python
 Pillow
 pymongo
 python-dotenv
-torch
-torchvision
