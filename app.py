@@ -241,7 +241,7 @@ def check_with_plate():
 
 # Run in HTTP
 # When debug = True, code is reloaded on the fly while saved
-app.run(host='0.0.0.0', port='5000', debug=True)
+app.run(host='0.0.0.0', port='5000', debug=False)
 
 # 1. Seperate face utils from plate utils
 # 2. Design templates for user_interface e.g loading and different page for result
