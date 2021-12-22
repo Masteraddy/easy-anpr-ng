@@ -1,4 +1,6 @@
-pytorch 
+--find-links https://download.pytorch.org/whl/torch_stable.html
+
+torch==1.10.1+cpu
 cloudinary
 easyocr==1.4
 face-recognition
