@@ -1,4 +1,4 @@
-https://download.pytorch.org/whl/cpu/torch-1.10.0-cp39-cp39-manylinux2014_aarch64.whl
+https://files.pythonhosted.org/packages/2c/c8/dcef19018d2fe730ecacf47650d3d6e8d6fe545f02fbdbde0174e0279f02/torch-1.10.1-cp39-cp39-manylinux1_x86_64.whl
 cloudinary
 easyocr==1.4
 face-recognition
